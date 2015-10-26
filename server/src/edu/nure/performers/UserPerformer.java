@@ -118,6 +118,7 @@ public class UserPerformer extends AbstractPerformer {
                     new String[]{"Name", "Phone","Email", "Right"},
                     new Object[]{user.getName(), user.getPhone(), user.getEmail(), user.getRight().getType().toLowerCase()}
             );
+            getConnection().setAutoCommit(false);
             int n = getStatement().executeUpdate(req);
 
 
@@ -126,6 +127,8 @@ public class UserPerformer extends AbstractPerformer {
                         RequestPreparing.join("`user_right` AS R", "INNER", "U.Right=R.Type")+"WHERE Phone = '" + user.getPhone() + "'"));
                 rs.next();
                 user = new User(rs);
+                getConnection().commit();
+                getConnection().setAutoCommit(true);
                 String aut_code = getCode(user);
                 String s = RequestPreparing.insert("aut", new String[]{"Id", "Code"}, new Object[]{user.getId(), aut_code});
                 getStatement().executeUpdate(s);
@@ -158,6 +161,8 @@ public class UserPerformer extends AbstractPerformer {
             }
         } catch (ValidationException e) {
             throw new PerformException("Ошибка формата данных");
+        } finally {
+            getConnection().setAutoCommit(true);
         }
 
     }

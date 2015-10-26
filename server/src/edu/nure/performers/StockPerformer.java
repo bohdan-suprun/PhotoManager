@@ -79,11 +79,13 @@ public class StockPerformer extends AbstractPerformer {
     protected void doInsert() throws PerformException, IOException, SQLException {
         try {
             Stock stock = new Stock(builder);
+            getConnection().setAutoCommit(false);
             int n = getStatement().executeUpdate(RequestPreparing.insert("stock", Stock.getFields(),
                     new Object[]{stock.getOrder(), stock.getImage(), stock.getDesc(),
                             stock.getFormat()}));
             if(n > 0) {
                 builder.add(new Stock(getLastInserted("stock")));
+                getConnection().commit();
                 builder.setStatus(ResponseBuilder.STATUS_OK);
                 return;
             }
@@ -98,6 +100,8 @@ public class StockPerformer extends AbstractPerformer {
             }
         } catch (ValidationException e) {
             throw new PerformException("Ошибка формата данных");
+        } finally {
+            getConnection().setAutoCommit(true);
         }
     }
 

@@ -37,11 +37,11 @@ public class MyDataSource implements DataSource {
         if(index >= pool.size())
             index = 0;
 
-            return pool.get(index++);
+        return pool.get(index++);
     }
 
     private Connection get() throws SQLException{
-       return DriverManager.getConnection("jdbc:mysql://localhost/pmanager?user=root&password=*****" +
+       return DriverManager.getConnection("jdbc:mysql://localhost/pmanager?user=root&password=****" +
                 "&useUnicode=yes&characterEncoding=UTF-8");
     }
 

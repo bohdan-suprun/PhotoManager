@@ -96,10 +96,12 @@ public class OrderPerformer extends AbstractPerformer {
                     new Object[]{order.getCustomer(), order.getResponsible(), order.getDesc(),
                             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(order.getTerm()), order.getForPay(), order.getStatus(),
                     order.getUrgency()});
+            getConnection().setAutoCommit(false);
             int n = getStatement().executeUpdate(s);
 
             if(n > 0) {
                 builder.add(new Order(getLastInserted("order")));
+                getConnection().commit();
                 builder.setStatus(ResponseBuilder.STATUS_OK);
                 return;
             }
@@ -114,6 +116,8 @@ public class OrderPerformer extends AbstractPerformer {
             }
         } catch (ValidationException e) {
             throw new PerformException("Ошибка формата данных");
+        } finally {
+            getConnection().setAutoCommit(true);
         }
     }
 

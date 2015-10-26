@@ -208,7 +208,7 @@ public class ImagePerformer extends AbstractPerformer{
                         new Date()
                 );
 
-                PreparedStatement ps  = Connector.getConnector().getImageUploadConnection().prepareStatement("INSERT INTO `IMAGE` " +
+                PreparedStatement ps  = getConnection().prepareStatement("INSERT INTO `IMAGE` " +
                         "(`Hash`, `Album`,`CreatedIn`,`Image`)" +
                         "VALUES(?, ?, ?, ?)");
 
@@ -216,12 +216,12 @@ public class ImagePerformer extends AbstractPerformer{
                 ps.setInt(2, image.getAlbum());
                 ps.setString(3, new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
                 ps.setBytes(4, buffer);
+                getConnection().setAutoCommit(false);
                 int n = ps.executeUpdate();
 
                 if(n > 0) {
-                    builder.add(new edu.nure.db.entity.Image(
-                            getLastInserted("image")
-                    ));
+                    builder.add(new edu.nure.db.entity.Image(getLastInserted("image")));
+                    getConnection().commit();
                     builder.setStatus(ResponseBuilder.STATUS_OK);
                     return;
                 }
@@ -234,6 +234,8 @@ public class ImagePerformer extends AbstractPerformer{
                 throw new PerformException("Ошибка обработки запроса");
             } catch (ValidationException ex){
                 throw new PerformException("Неверный формат данных");
+            } finally {
+                getConnection().setAutoCommit(true);
             }
         } else{
             throw new PerformException("Неверный формат входного пакета");
